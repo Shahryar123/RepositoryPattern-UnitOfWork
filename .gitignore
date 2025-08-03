@@ -1,0 +1,12 @@
+﻿# Ignore Visual Studio folder
+.vs/
+
+# Ignore build artifacts
+obj/
+bin/
+Migrations/
+
+
+# Ignore user-specific files
+appsettings.Development.json
+appsettings.json
