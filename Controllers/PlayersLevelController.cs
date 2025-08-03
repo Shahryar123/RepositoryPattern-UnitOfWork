@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using RepositoryPattern_And_UnitOfWork.Data;
 using RepositoryPattern_And_UnitOfWork.Models;
+using RepositoryPattern_And_UnitOfWork.Repository;
 
 namespace RepositoryPattern_And_UnitOfWork.Controllers
 {
@@ -9,55 +10,51 @@ namespace RepositoryPattern_And_UnitOfWork.Controllers
     [Route("api/[controller]")]
     public class PlayersLevelController : ControllerBase
     {
-        private readonly AppDBContext _dbContext;
-        public PlayersLevelController(AppDBContext dBContext) => _dbContext = dBContext;
+        private readonly IPlayersLevelRepository _iplayers;
+        public PlayersLevelController(IPlayersLevelRepository players) => _iplayers = players;
 
         // GET: api/PlayersLevel
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PlayersLevel>>> GetAllAsync()
+        public async Task<ActionResult<IEnumerable<PlayersLevel?>>> GetAllAsync()
         {
-            return await _dbContext.PlayersLevels.ToListAsync();
+            return await _iplayers.GetAllAsync() switch
+            {
+                IEnumerable<PlayersLevel> playersLevels => Ok(playersLevels),
+                _ => NotFound()
+            };
         }
 
         // GET: api/PlayersLevel/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<PlayersLevel>> GetByIdAsync(int id)
         {
-            var playerLevel = await _dbContext.PlayersLevels.FindAsync(id);
-            if (playerLevel == null)
+            var playersLevel = await _iplayers.GetByIdAsync(id);
+            if (playersLevel == null)
                 return NotFound();
-            return playerLevel;
+            return Ok(playersLevel);
         }
 
         // POST: api/PlayersLevel
         [HttpPost]
         public async Task<ActionResult<PlayersLevel>> CreateAsync([FromBody] PlayersLevel playersLevel)
         {
-            _dbContext.PlayersLevels.Add(playersLevel);
-            await _dbContext.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetByIdAsync), new { id = playersLevel.Id }, playersLevel);
+            if (playersLevel == null)
+                return BadRequest("PlayersLevel cannot be null");
+            var createdPlayerLevel = await _iplayers.CreateAsync(playersLevel);
+            return CreatedAtAction(nameof(GetByIdAsync), new { id = createdPlayerLevel.Id }, createdPlayerLevel);
         }
 
         // PUT: api/PlayersLevel/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAsync(int id, [FromBody] PlayersLevel playersLevel)
         {
-            if (id != playersLevel.Id)
-                return BadRequest();
+            var existingPlayerLevel = await _iplayers.GetByIdAsync(id);
+            if (existingPlayerLevel == null)
+                return NotFound();
 
-            _dbContext.Entry(playersLevel).State = EntityState.Modified;
-
-            try
-            {
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await _dbContext.PlayersLevels.AnyAsync(e => e.Id == id))
-                    return NotFound();
-                throw;
-            }
-
+            var updated = await _iplayers.UpdateAsync(id, playersLevel);
+            if (!updated)
+                return StatusCode(500, "PlayersLevel data is Empty");
             return NoContent();
         }
 
@@ -65,13 +62,12 @@ namespace RepositoryPattern_And_UnitOfWork.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            var playerLevel = await _dbContext.PlayersLevels.FindAsync(id);
-            if (playerLevel == null)
+            var existingPlayerLevel = await _iplayers.GetByIdAsync(id);
+            if (existingPlayerLevel == null)
                 return NotFound();
-
-            _dbContext.PlayersLevels.Remove(playerLevel);
-            await _dbContext.SaveChangesAsync();
-
+            var deleted = await _iplayers.DeleteAsync(id, existingPlayerLevel);
+            if (!deleted)
+                return StatusCode(500, "An error occurred while deleting the PlayersLevel");
             return NoContent();
         }
     }

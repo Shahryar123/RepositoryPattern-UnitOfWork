@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using RepositoryPattern_And_UnitOfWork.Data;
+using RepositoryPattern_And_UnitOfWork.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,7 @@ builder.Services.AddDbContext
     <AppDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<IPlayersLevelRepository, PlayersLevelRepository>();
 
 var app = builder.Build();
 
