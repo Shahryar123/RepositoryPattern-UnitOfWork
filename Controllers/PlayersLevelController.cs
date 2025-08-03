@@ -35,7 +35,7 @@ namespace RepositoryPattern_And_UnitOfWork.Controllers
         {
             _dbContext.PlayersLevels.Add(playersLevel);
             await _dbContext.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetByIdAsync), new { id = playersLevel.Id }, playersLevel);
+            return Ok(playersLevel);
         }
 
         // PUT: api/PlayersLevel/{id}
