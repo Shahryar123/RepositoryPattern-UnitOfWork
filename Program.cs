@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using RepositoryPattern_And_UnitOfWork.Data;
 using RepositoryPattern_And_UnitOfWork.Repository;
+using RepositoryPattern_And_UnitOfWork.Repository.Generic;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,8 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 builder.Services.AddDbContext
     <AppDBContext>(options =>
