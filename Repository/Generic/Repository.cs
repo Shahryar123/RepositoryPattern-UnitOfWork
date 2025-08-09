@@ -24,7 +24,7 @@ namespace RepositoryPattern_And_UnitOfWork.Repository.Generic
         public async Task<T> CreateAsync(T entity)
         {
             _dbSet.Add(entity);
-            return await _dbContext.SaveChangesAsync().ContinueWith(t => entity);
+            return entity;
         }
         public async Task<bool> UpdateAsync(int id, T entity)
         {

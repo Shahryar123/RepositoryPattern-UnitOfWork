@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RepositoryPattern_And_UnitOfWork.Data;
 using RepositoryPattern_And_UnitOfWork.Repository;
 using RepositoryPattern_And_UnitOfWork.Repository.Generic;
+using RepositoryPattern_And_UnitOfWork.Repository.UnitOfWork;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IUnitofWork, UnitofWork>();
 
 builder.Services.AddDbContext
     <AppDBContext>(options =>
